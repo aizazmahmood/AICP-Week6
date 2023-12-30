@@ -14,7 +14,7 @@ public:
     
     Sack() : weight(0.0), content('\0') {}
 
-   
+    
     void setWeight(double w) {
         weight = w;
     }
@@ -22,6 +22,11 @@ public:
     
     void setContent(char c) {
         content = c;
+    }
+
+    
+    char getContent() const {
+        return content;
     }
 
     
@@ -34,6 +39,16 @@ public:
     }
 
     
+    double getRegularPrice() const {
+        if (content == 'C') {
+            return 3.0;
+        } else if (content == 'G' || content == 'S') {
+            return 2.0;
+        }
+        return 0.0; 
+    }
+
+    
     void displaySack() const {
         if (isValidSack()) {
                cout << "Accepted Sack:\n";
@@ -43,20 +58,20 @@ public:
                cout << "Rejected Sack:\n";
                cout << "Reason(s): ";
             if (!(content == 'C' || content == 'G' || content == 'S')) {
-                  cout << "Invalid content. ";
+                   cout << "Invalid content. ";
             }
             if (!((content == 'C' && weight >= 24.9 && weight <= 25.1) ||
                   ((content == 'G' || content == 'S') && weight >= 49.9 && weight <= 50.1))) {
-                  cout << "Invalid weight.";
+                   cout << "Invalid weight.";
             }
-               cout << "\n";
+                cout << "\n";
         }
     }
 };
 
 class Order {
 private:
-    std::vector<Sack> sacks;
+    vector<Sack> sacks;
 
 public:
     
@@ -68,6 +83,8 @@ public:
     void checkOrder() const {
         double totalWeight = 0.0;
         int rejectedSacks = 0;
+        double regularPrice = 0.0;
+        int specialPackCount = 0;
 
         cout << "Order Details:\n";
 
@@ -78,18 +95,49 @@ public:
                 rejectedSacks++;
             } else {
                 totalWeight += sack.isValidSack() ? sack.isValidSack() : 0;
+                regularPrice += sack.getRegularPrice();
+
+                
+                if (sack.getContent() == 'C') {
+                    
+                    int sandCount = 0;
+                    int gravelCount = 0;
+
+                    for (const Sack& s : sacks) {
+                        if (s.isValidSack()) {
+                            if (s.getContent() == 'S') {
+                                sandCount++;
+                            } else if (s.getContent() == 'G') {
+                                gravelCount++;
+                            }
+                        }
+                    }
+
+                    if (sandCount >= 2 && gravelCount >= 2) {
+                        specialPackCount++;
+                        regularPrice -= sack.getRegularPrice(); // Deduct regular price
+                    }
+                }
             }
         }
 
            cout << "Total Weight of the Order: " << totalWeight << " kilograms\n";
            cout << "Number of Rejected Sacks: " << rejectedSacks << "\n";
+           cout << "Regular Price for the Order: $" << regularPrice << "\n";
+
+        if (specialPackCount > 0) {
+            double discountPrice = regularPrice - (specialPackCount * 10.0);
+                cout << "Special Pack(s) Applied: " << specialPackCount << "\n";
+                cout << "New Price for the Order: $" << discountPrice << "\n";
+                cout << "Amount Saved: $" << regularPrice - discountPrice << "\n";
+        }
     }
 };
 
 int main() {
     Order customerOrder;
 
-   
+    
     int numSacks;
     cout << "Enter the number of sacks for the order: ";
     cin >> numSacks;
@@ -118,4 +166,3 @@ int main() {
 
     return 0;
 }
-
